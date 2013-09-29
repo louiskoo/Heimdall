@@ -43,7 +43,7 @@ map<string, Interface::ActionInfo> actionMap;
 bool stdoutErrors = false;
 		
 const char *version = "v1.4.0";
-const char *actionUsage = "Usage: heimdall <action> <action arguments>\n";
+const char *actionUsage = "Usage: heimdall <busNumber> <deviceAddress> <action> <action arguments>\n";
 
 const char *releaseInfo = "Heimdall %s\n\n\
 Copyright (c) 2010-2013, Benjamin Dobell, Glass Echidna\n\
