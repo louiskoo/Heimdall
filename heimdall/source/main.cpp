@@ -44,7 +44,7 @@ int main(int argc, char **argv)
 	}
 
 	int result = 0;
-	map<string, Interface::ActionInfo>::const_iterator actionIt = Interface::GetActionMap().find(argv[1]);
+	map<string, Interface::ActionInfo>::const_iterator actionIt = Interface::GetActionMap().find(argv[3]);
 
 	if (actionIt != Interface::GetActionMap().end())
 		result = actionIt->second.executeFunction(argc, argv);
