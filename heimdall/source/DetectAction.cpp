@@ -44,7 +44,7 @@ int DetectAction::Execute(int argc, char **argv)
 
 	Arguments arguments(argumentTypes);
 
-	if (!arguments.ParseArguments(argc, argv, 2))
+	if (!arguments.ParseArguments(argc, argv, 4))
 	{
 		Interface::Print(DetectAction::usage);
 		return (0);
@@ -96,7 +96,7 @@ int DetectAction::Execute(int argc, char **argv)
 	BridgeManager *bridgeManager = new BridgeManager(verbose);
 	bridgeManager->SetUsbLogLevel(usbLogLevel);
 
-	bool detected = bridgeManager->DetectDevice();
+	bool detected = bridgeManager->DetectDevice(argv);
 
 	delete bridgeManager;
 
