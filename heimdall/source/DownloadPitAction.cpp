@@ -52,7 +52,7 @@ int DownloadPitAction::Execute(int argc, char **argv)
 
 	Arguments arguments(argumentTypes);
 
-	if (!arguments.ParseArguments(argc, argv, 2))
+	if (!arguments.ParseArguments(argc, argv, 4))
 	{
 		Interface::Print(DownloadPitAction::usage);
 		return (0);
@@ -138,7 +138,7 @@ int DownloadPitAction::Execute(int argc, char **argv)
 	BridgeManager *bridgeManager = new BridgeManager(verbose, communicationDelay);
 	bridgeManager->SetUsbLogLevel(usbLogLevel);
 
-	if (bridgeManager->Initialise(resume) != BridgeManager::kInitialiseSucceeded || !bridgeManager->BeginSession())
+	if (bridgeManager->Initialise(resume, argv) != BridgeManager::kInitialiseSucceeded || !bridgeManager->BeginSession())
 	{
 		fclose(outputPitFile);
 		delete bridgeManager;
