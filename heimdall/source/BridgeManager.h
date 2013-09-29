@@ -124,7 +124,7 @@ namespace Heimdall
 
 			UsbLogLevel usbLogLevel;
 
-			int FindDeviceInterface(void);
+			int FindDeviceInterface(char **argv);
 			bool ClaimDeviceInterface(void);
 			bool SetupDeviceInterface(void);
 			void ReleaseDeviceInterface(void);
@@ -136,8 +136,8 @@ namespace Heimdall
 			BridgeManager(bool verbose, int communicationDelay = BridgeManager::kCommunicationDelayDefault);
 			~BridgeManager();
 
-			bool DetectDevice(void);
-			int Initialise(bool resume);
+			bool DetectDevice(char **argv);
+			int Initialise(bool resume, char **argv);
 
 			bool BeginSession(void);
 			bool EndSession(bool reboot) const;
