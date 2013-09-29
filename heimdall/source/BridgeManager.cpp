@@ -24,6 +24,8 @@
 // libusb
 #include <libusb.h>
 
+#include <stdlib.h>
+
 // Heimdall
 #include "BeginDumpPacket.h"
 #include "BeginSessionPacket.h"
@@ -89,18 +91,27 @@ enum
 	kPitSizeMultiplicand = 4096
 };
 
-int BridgeManager::FindDeviceInterface(void)
+int BridgeManager::FindDeviceInterface(char **argv)
 {
 	Interface::Print("Detecting device...\n");
 
 	struct libusb_device **devices;
 	int deviceCount = libusb_get_device_list(libusbContext, &devices);
+	
+	Interface::Print("--------deviceCout = %d\n",deviceCount);
 
+	/***************
 	for (int deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++)
 	{
 		libusb_device_descriptor descriptor;
 		libusb_get_device_descriptor(devices[deviceIndex], &descriptor);
 
+		Interface::Print("---------bus = %d\n", libusb_get_bus_number(devices[deviceIndex]));
+
+		//Interface::Print("---------port = %d\n", libusb_get_port_number(devices[deviceIndex]));
+		Interface::Print("---------device_address = %d\n", libusb_get_device_address(devices[deviceIndex]));
+
+		Interface::Print("----------idVendor = %x; idProduct = %x\n", descriptor.idVendor, descriptor.idProduct);
 		for (int i = 0; i < BridgeManager::kSupportedDeviceCount; i++)
 		{
 			if (descriptor.idVendor == supportedDevices[i].vendorId && descriptor.idProduct == supportedDevices[i].productId)
@@ -114,6 +125,29 @@ int BridgeManager::FindDeviceInterface(void)
 		if (heimdallDevice)
 			break;
 	}
+	********************/
+
+	/******************added by wangbing************************/
+	for (int deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++)
+	{
+		int busNumber = libusb_get_bus_number(devices[deviceIndex]);
+		int deviceAddress = libusb_get_device_address(devices[deviceIndex]);
+		if (busNumber == atoi(argv[1]) && deviceAddress == atoi(argv[2]))
+		{	
+			libusb_device_descriptor descriptor;
+			libusb_get_device_descriptor(devices[deviceIndex], &descriptor);
+			for (int i = 0; i < BridgeManager::kSupportedDeviceCount; i++)
+			{
+				if (descriptor.idVendor == supportedDevices[i].vendorId && descriptor.idProduct == supportedDevices[i].productId)
+				{
+					heimdallDevice = devices[deviceIndex];
+					libusb_ref_device(heimdallDevice);
+					break;
+				}
+			}
+		}
+	}
+	/******************* end *******************************/
 
 	libusb_free_device_list(devices, deviceCount);
 
@@ -485,7 +519,7 @@ BridgeManager::~BridgeManager()
 		libusb_exit(libusbContext);
 }
 
-bool BridgeManager::DetectDevice(void)
+bool BridgeManager::DetectDevice(char **argv)
 {
 	// Initialise libusb
 	int result = libusb_init(&libusbContext);
@@ -523,9 +557,12 @@ bool BridgeManager::DetectDevice(void)
 	// Get handle to Galaxy S device
 	struct libusb_device **devices;
 	int deviceCount = libusb_get_device_list(libusbContext, &devices);
+	Interface::Print("-----------deviceCount = %d!\n", deviceCount);
 
+	/************************
 	for (int deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++)
 	{
+		Interface::Print("-----------deviceIndex = %d!\n", deviceIndex);
 		libusb_device_descriptor descriptor;
 		libusb_get_device_descriptor(devices[deviceIndex], &descriptor);
 
@@ -540,6 +577,29 @@ bool BridgeManager::DetectDevice(void)
 			}
 		}
 	}
+	*******************/
+
+	/******************added by wangbing************************/
+	for (int deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++)
+	{
+		int busNumber = libusb_get_bus_number(devices[deviceIndex]);
+		int deviceAddress = libusb_get_device_address(devices[deviceIndex]);
+		if (busNumber == atoi(argv[1]) && deviceAddress == atoi(argv[2]))
+		{	
+			libusb_device_descriptor descriptor;
+			libusb_get_device_descriptor(devices[deviceIndex], &descriptor);
+			for (int i = 0; i < BridgeManager::kSupportedDeviceCount; i++)
+			{
+				if (descriptor.idVendor == supportedDevices[i].vendorId && descriptor.idProduct == supportedDevices[i].productId)
+				{
+					libusb_free_device_list(devices, deviceCount);
+					Interface::Print("Device detected\n");
+					return (true);
+				}
+			}
+		}
+	}
+	/******************* end *******************************/
 
 	libusb_free_device_list(devices, deviceCount);
 
@@ -547,7 +607,7 @@ bool BridgeManager::DetectDevice(void)
 	return (false);
 }
 
-int BridgeManager::Initialise(bool resume)
+int BridgeManager::Initialise(bool resume, char **argv)
 {
 	Interface::Print("Initialising connection...\n");
 
@@ -585,7 +645,7 @@ int BridgeManager::Initialise(bool resume)
 			break;
 	}
 	
-	result = FindDeviceInterface();
+	result = FindDeviceInterface(argv);
 
 	if (result != BridgeManager::kInitialiseSucceeded)
 		return (result);
